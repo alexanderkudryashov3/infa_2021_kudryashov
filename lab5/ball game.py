@@ -14,7 +14,6 @@ CYAN = (0, 255, 255)
 BLACK = (0, 0, 0)
 COLORS = [RED, BLUE, YELLOW, GREEN, MAGENTA, CYAN]
 
-global points, num_balls
 points, num_balls = 0, 10
 
 pygame.display.update()
@@ -36,6 +35,15 @@ def click_handler(event):
     global points
     x1, y1 = event.pos
     click_inside_ball = [r[i]**2>(x[i]-x1)**2+(y[i]-y1)**2 for i in range(num_balls)]
+    for i in range(num_balls):
+        if(click_inside_ball[i]):
+            x[i] = randint(100, 700)
+            y[i] = randint(100, 500)
+            r[i] = randint(30, 50)
+            v_x[i] = randint(-10, +10)
+            v_y[i] = randint(-10, +10)
+            colors[i] = COLORS[randint(0, 5)]
+
     points += sum(click_inside_ball)
 
 
@@ -58,6 +66,7 @@ def display_points():
     textsurface = myfont.render(str(points), False, (200, 200, 200))
     screen.blit(textsurface, (50, 0))
 
+
 colors = [COLORS[randint(0, 5)] for i in range(num_balls)]
 x = [randint(100, 700) for i in range(num_balls)]
 y = [randint(100, 500) for i in range(num_balls)]
@@ -76,10 +85,7 @@ while not finished:
     x = [x[i] + v_x[i] for i in range(num_balls)]
     y = [y[i] + v_y[i] for i in range(num_balls)]
     screen.fill(BLACK)
-
     display_points()
-
-
     draw_balls(x, y, r, colors)
     pygame.display.update()
 
