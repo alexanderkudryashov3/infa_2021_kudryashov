@@ -32,18 +32,11 @@ def draw_balls(x, y, r, colors):
         new_ball(x[i], y[i], r[i], colors[i])
 
 
-def click(event):
-    print(x, y, r)
-    print(event.pos)
-    print(is_inside(event))
-
-
-def is_inside(event):
+def click_handler(event):
     global points
     x1, y1 = event.pos
     click_inside_ball = [r[i]**2>(x[i]-x1)**2+(y[i]-y1)**2 for i in range(num_balls)]
     points += sum(click_inside_ball)
-    return points
 
 
 def check_wall():
@@ -59,6 +52,11 @@ def check_wall():
             v_y[i] *= -1
 
 
+def display_points():
+    pygame.font.init()
+    myfont = pygame.font.SysFont('Comic Sans MS', 150)
+    textsurface = myfont.render(str(points), False, (200, 200, 200))
+    screen.blit(textsurface, (50, 0))
 
 colors = [COLORS[randint(0, 5)] for i in range(num_balls)]
 x = [randint(100, 700) for i in range(num_balls)]
@@ -73,12 +71,15 @@ while not finished:
         if event.type == pygame.QUIT:
             finished = True
         elif event.type == pygame.MOUSEBUTTONDOWN:
-            print('Click!')
-            click(event)
+            click_handler(event)
     check_wall()
     x = [x[i] + v_x[i] for i in range(num_balls)]
     y = [y[i] + v_y[i] for i in range(num_balls)]
     screen.fill(BLACK)
+
+    display_points()
+
+
     draw_balls(x, y, r, colors)
     pygame.display.update()
 
