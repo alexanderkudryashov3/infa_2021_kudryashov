@@ -12,23 +12,34 @@ GREEN = (0, 255, 0)
 MAGENTA = (255, 0, 255)
 CYAN = (0, 255, 255)
 BLACK = (0, 0, 0)
-COLORS = [RED, BLUE, YELLOW, GREEN, MAGENTA, CYAN]
-
-points, num_balls = 0, 10
+WHITE = (255, 255, 255)
+COLORS = [RED, BLUE, YELLOW, GREEN, MAGENTA, CYAN, WHITE]
 
 pygame.display.update()
 clock = pygame.time.Clock()
 finished = False
 
+points, num_balls = 0, 20
+x, y, r, v_x, v_y, colors = [0] * num_balls, [0] * num_balls, [0] * num_balls,\
+                            [0] * num_balls, [0] * num_balls, [0] * num_balls
 
-def new_ball(x1, y1, r1, color):
 
-    circle(screen, color, (x1, y1), r1)
+def generate_new_ball(i):
+    '''
+    Создает новый шарик, i-й по номеру
+    '''
+    global x, y, r, v_x, v_y, colors
+    x[i] = randint(100, 700)
+    y[i] = randint(100, 500)
+    r[i] = randint(30, 50)
+    v_x[i] = randint(-10, +10)
+    v_y[i] = randint(-10, +10)
+    colors[i] = COLORS[randint(0, 6)]
 
 
 def draw_balls(x, y, r, colors):
     for i in range(num_balls):
-        new_ball(x[i], y[i], r[i], colors[i])
+        circle(screen, colors[i], (x[i], y[i]), r[i])
 
 
 def click_handler(event):
@@ -36,20 +47,14 @@ def click_handler(event):
     x1, y1 = event.pos
     click_inside_ball = [r[i]**2>(x[i]-x1)**2+(y[i]-y1)**2 for i in range(num_balls)]
     for i in range(num_balls):
-        if(click_inside_ball[i]):
-            x[i] = randint(100, 700)
-            y[i] = randint(100, 500)
-            r[i] = randint(30, 50)
-            v_x[i] = randint(-10, +10)
-            v_y[i] = randint(-10, +10)
-            colors[i] = COLORS[randint(0, 5)]
-
+        if click_inside_ball[i]:
+            generate_new_ball(i)
     points += sum(click_inside_ball)
 
 
 def check_wall():
     global x, y, r, v_x, v_y, num_balls
-    hit_right_wall = [1200 - x[i] + r[i] <= v_x[i] and v_x[i] > 0 for i in range(num_balls)]
+    hit_right_wall = [1120 - x[i] + r[i] <= v_x[i] and v_x[i] > 0 for i in range(num_balls)]
     hit_left_wall = [x[i] - r[i] <= abs(v_x[i]) and v_x[i] < 0 for i in range(num_balls)]
     hit_upper_wall = [y[i] - r[i] <= abs(v_y[i]) and v_y[i] < 0 for i in range(num_balls)]
     hit_lower_wall = [900 - y[i] - r[i] <= v_y[i] and v_y[i] > 0 for i in range(num_balls)]
@@ -67,23 +72,25 @@ def display_points():
     screen.blit(textsurface, (50, 0))
 
 
-colors = [COLORS[randint(0, 5)] for i in range(num_balls)]
-x = [randint(100, 700) for i in range(num_balls)]
-y = [randint(100, 500) for i in range(num_balls)]
-r = [randint(30, 50) for i in range(num_balls)]
-v_x = [randint(-10, +10) for i in range(num_balls)]
-v_y = [randint(-10, +10) for i in range(num_balls)]
+def balls_position_update():
+    global x, y, v_x, v_y
+    x = [x[i] + v_x[i] for i in range(num_balls)]
+    y = [y[i] + v_y[i] for i in range(num_balls)]
+
+
+for i in range(num_balls):
+    generate_new_ball(i)
+
 while not finished:
     clock.tick(FPS)
-    x[1] += 10
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             finished = True
         elif event.type == pygame.MOUSEBUTTONDOWN:
             click_handler(event)
+
     check_wall()
-    x = [x[i] + v_x[i] for i in range(num_balls)]
-    y = [y[i] + v_y[i] for i in range(num_balls)]
+    balls_position_update()
     screen.fill(BLACK)
     display_points()
     draw_balls(x, y, r, colors)
