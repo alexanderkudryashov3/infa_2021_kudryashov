@@ -119,6 +119,7 @@ class Gun:
         else:
             self.color = GREY
 
+
     def draw(self):
         # fixme
         l = 100
@@ -154,9 +155,21 @@ class Target:
         self.live = 1
         x = self.x = rnd(600, 780)
         y = self.y = rnd(300, 550)
-        r = self.r = rnd(2, 50)
+        vx = self.vx = rnd(-20, 20)
+        vy = self.vy = rnd(-20, 20)
+        r = self.r = rnd(30, 50)
 
         color = self.color = RED
+
+
+    def move(self):
+        self.x += self.vx
+        self.y -= self.vy
+        if self.x + self.r >= WIDTH or self.x - self.r <= 0:
+            self.vx = self.vx * (-1)
+        if self.y + self.r >= HEIGHT or self.y - self.r <= 0:
+            self.vy *= (-1)
+
 
     def hit(self, points=1):
         """Попадание шарика в цель."""
@@ -214,5 +227,7 @@ while not finished:
                 targets.remove(target)
                 targets.append(Target(screen))
         gun.power_up()
+    for target in targets:
+        target.move()
 
 pygame.quit()
