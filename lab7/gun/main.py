@@ -54,11 +54,12 @@ class Ball:
             self.vx = self.vx * (-1)
         if self.y + self.r >= HEIGHT or self.y - self.r <= 0:
             self.vy *= (-1)
+
+    def kill_balls(self):
         if self.live > 0:
             self.live -=1
         else:
             balls.remove(self)
-
 
     def draw(self):
         pygame.draw.circle(
@@ -126,8 +127,10 @@ class Gun:
         if self.f2_on:
             x *= self.f2_power
             y *= self.f2_power
-
-        pygame.draw.line(self.screen, 'Black', (20, 450), (20+x, 450 - y), 10)
+        l_0 = 100
+        pygame.draw.line(self.screen, 'Black', (20, 450), (20 + math.cos(self.an)*(l_0+ self.f2_power),
+                          450 - math.sin(self.an) *(l_0 + self.f2_power)),
+                         10)
 
 
     def power_up(self):
@@ -172,16 +175,20 @@ pygame.init()
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 bullet = 0
 balls = []
-
+targets = []
+num_targets = 2
 clock = pygame.time.Clock()
 gun = Gun(screen)
-target = Target(screen)
+
+for i in range(num_targets):
+    targets.append(Target(screen))
 finished = False
 
 while not finished:
     screen.fill(WHITE)
     gun.draw()
-    target.draw()
+    for target in targets:
+        target.draw()
     for b in balls:
         b.draw()
     pygame.display.update()
@@ -199,11 +206,13 @@ while not finished:
 
     for b in balls:
         b.move()
-        if b.hittest(target) and target.live:
-            target.live = 0
-            target.hit()
-
-            target = Target(screen)
-    gun.power_up()
+        b.kill_balls()
+        for target in targets:
+            if b.hittest(target) and target.live:
+                target.live = 0
+                target.hit()
+                targets.remove(target)
+                targets.append(Target(screen))
+        gun.power_up()
 
 pygame.quit()
