@@ -1,10 +1,9 @@
+import pygame
 import math
 from random import choice
 from random import randint as rnd
 
-import pygame
-
-FPS = 30
+FPS = 100
 
 RED = 0xFF0000
 BLUE = 0x0000FF
@@ -104,21 +103,22 @@ class Gun:
         new_ball = Ball(self.screen)
         new_ball.r += 5
         self.an = math.atan2((event.pos[1] - new_ball.y), (event.pos[0] - new_ball.x))
-        new_ball.vx = self.f2_power * math.cos(self.an)
-        new_ball.vy = - self.f2_power * math.sin(self.an)
+        new_ball.vx = self.f2_power * math.cos(self.an)/2
+        new_ball.vy = - self.f2_power * math.sin(self.an)/2
         balls.append(new_ball)
         self.f2_on = 0
         self.f2_power = 10
+        gun.targetting(event)
 
     def targetting(self, event):
         """Прицеливание. Зависит от положения мыши."""
         if event:
-            self.an = math.atan(-(event.pos[1] - 450) / (event.pos[0] - 20))
+            if event.pos[0] - 20 > 0:
+                self.an = math.atan(-(event.pos[1] - 450) / (event.pos[0] - 20))
         if self.f2_on:
             self.color = RED
         else:
             self.color = GREY
-
 
     def draw(self):
         # fixme
@@ -129,10 +129,10 @@ class Gun:
             x *= self.f2_power
             y *= self.f2_power
         l_0 = 100
-        pygame.draw.line(self.screen, 'Black', (20, 450), (20 + math.cos(self.an)*(l_0+ self.f2_power),
+
+        pygame.draw.line(self.screen, self.color, (20, 450), (20 + math.cos(self.an)*(l_0+ self.f2_power),
                           450 - math.sin(self.an) *(l_0 + self.f2_power)),
                          10)
-
 
     def power_up(self):
         if self.f2_on:
@@ -155,21 +155,11 @@ class Target:
         self.live = 1
         x = self.x = rnd(600, 780)
         y = self.y = rnd(300, 550)
-        vx = self.vx = rnd(-20, 20)
-        vy = self.vy = rnd(-20, 20)
-        r = self.r = rnd(30, 50)
+        vx = self.vx = rnd(-10, 10)
+        vy = self.vy = rnd(-10, 10)
+        r = self.r = rnd(20, 50)
 
-        color = self.color = RED
-
-
-    def move(self):
-        self.x += self.vx
-        self.y -= self.vy
-        if self.x + self.r >= WIDTH or self.x - self.r <= 0:
-            self.vx = self.vx * (-1)
-        if self.y + self.r >= HEIGHT or self.y - self.r <= 0:
-            self.vy *= (-1)
-
+        color = self.color = BLACK
 
     def hit(self, points=1):
         """Попадание шарика в цель."""
@@ -180,8 +170,16 @@ class Target:
             self.screen,
             self.color,
             (self.x, self.y),
-            self.r
-        )
+            self.r)
+
+    def move(self):
+        self.x += self.vx
+        self.y -= self.vy
+        if self.x + self.r >= WIDTH or self.x - self.r <= 0:
+            self.vx = self.vx * (-1)
+        if self.y + self.r >= HEIGHT or self.y - self.r <= 0:
+            self.vy *= (-1)
+
 
 
 pygame.init()
@@ -229,5 +227,4 @@ while not finished:
         gun.power_up()
     for target in targets:
         target.move()
-
 pygame.quit()
